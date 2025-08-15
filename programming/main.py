@@ -1,4 +1,3 @@
-print('oi alladin')
 # -----------------------------------------
 # CONFIGURAÇÃO E IMPORTAÇÕES
 # -----------------------------------------
@@ -60,7 +59,7 @@ guinadacalc = 0
 method_stop = 0
 method_up = 0
 hsv_esquerdo = 0
-hsv_direito = 0 
+hsv_direito = 0
 reflexao_esquerdo = 0
 reflexao_direito = 0
 prata_verify = 0
@@ -148,7 +147,7 @@ async def gyro_turn(graus):
     global erro, integral, derivada, correcao, erro_final
     global GYRO_TOL, GYRO_MIN, GYRO_MAX
 
-    
+
 
     await redefinir_pid()
 
@@ -243,7 +242,7 @@ async def Gyro_Move(rotacoes, velocidade_final, reverso=False):
         if rot_atual >= abs(rotacoes):
             break
 
-        
+
         erro = ((alvo_heading - MTZZ.imu.heading() + 540) % 360) - 180
 
         if reverso:
@@ -273,7 +272,7 @@ async def Gyro_Move(rotacoes, velocidade_final, reverso=False):
     motoresquerdo.brake()
     motordireito.brake()
 
-    
+
     erro_residual = ((alvo_heading - MTZZ.imu.heading() + 540) % 360) - 180
 
     if abs(erro_residual) > 0.05:
@@ -307,7 +306,7 @@ async def Gyro_Move_Infinito(velocidade_final, reverso=False):
     motoresquerdo.reset_angle(0)
     await wait(0)
 
-     
+
     alvo_heading = 0
 
     print("Gyro_Move_Infinito iniciado. Alvo =", alvo_heading)
@@ -350,7 +349,7 @@ async def Gyro_Move_Infinito(velocidade_final, reverso=False):
     motoresquerdo.brake()
     motordireito.brake()
 
-    # Correção de heading final 
+    # Correção de heading final
     erro_residual = ((alvo_heading - MTZZ.imu.heading() + 540) % 360) - 180
 
     if abs(erro_residual) > 0.05:
@@ -403,13 +402,13 @@ async def Gyro_Move_Ate_Colisao(velocidade_final, reverso=False):
         # Corrige heading baseado em IMU
         erro = ((alvo_heading - MTZZ.imu.heading() + 540) % 360) - 180
         await PID(2.5, 0.002, 0.025)
-        
+
         # Aceleração progressiva
         if velocidade_atual < velocidade_maxima:
             velocidade_atual += incremento
         velocidade_atual = max(velocidade_minima, min(velocidade_maxima, velocidade_atual))
 
-        
+
         if reverso:
             pot_esq = sinal * (velocidade_atual - correcao)
             pot_dir = sinal * (velocidade_atual + correcao)
@@ -430,7 +429,7 @@ async def Gyro_Move_Ate_Colisao(velocidade_final, reverso=False):
         if reverso and (abs(vel_real_esq) >= 300 or abs(vel_real_dir) >= 300):
             paredecalc = 5
 
-        
+
 
 
         # Detecção de colisão — mesma lógica serve pra frente e ré
@@ -448,7 +447,7 @@ async def Gyro_Move_Ate_Colisao(velocidade_final, reverso=False):
     motoresquerdo.brake()
     motordireito.brake()
 
-    
+
     await wait(1000)
     print("✅ Gyro_Move_Ate_Colisao concluído. Heading final:", MTZZ.imu.heading())
     zerar_heading_residual(alvo_heading)
@@ -465,13 +464,13 @@ async def obstaculo():
         await drive_base.straight(-100)
         await gyro_turn(65)
         await drive_base.straight(100)
-        
+
         while not await sensor_direito.color() == Color.NONE:
             await wait(0)
             motordireito.dc(86)
 
             motoresquerdo.dc(28)
-            
+
             await multitask(
                 wait(0),
             )
@@ -487,7 +486,7 @@ async def Green_Left():
         await drive_base.straight(40)
         await redefinir()  # <- também limpa
         await redefinir_pid()
-    
+
 
 async def Green_Right():
     if is_verde(await sensor_direito.hsv()):
@@ -498,7 +497,7 @@ async def Green_Right():
         await drive_base.straight(40)
         await redefinir()  # <- aqui limpa o PID antes de voltar ao seguidor
         await redefinir_pid()
-    
+
 
 
 
@@ -511,13 +510,13 @@ async def subida():
         prata_verify = 1
         await drive_base.straight(80)
         method_up = 10
-        pid_p = 0.5 
+        pid_p = 0.5
         pid_i = 0
         pid_d = 0
-        
+
         await descer_garra()
         await drive_base.straight(80)
-        
+
         drive_base.stop()
         await wait(500)
     else:
@@ -537,7 +536,7 @@ async def subida():
 async def pratax_resgate():
     global hsv_esquerdo, hsv_direito, reflexao_esquerdo, reflexao_direito, prata_verify
     await wait(0)
-    
+
     # Obtenção dos valores HSV dos sensores
     hsv_esquerdo = await sensor_esquerdo.hsv()
     hsv_direito = await sensor_direito.hsv()
@@ -575,7 +574,7 @@ async def resgate_dir():
         Gyro_Move(0.7, 70, reverso=True),
         subir_garra()
     )
-    
+
 
 
 
@@ -609,14 +608,14 @@ async def cores_resgate_viradas():
     hsv = await sensor_frente.hsv()
     if is_pretoresgate(await sensor_direito.hsv()) and is_pretoresgate(await sensor_esquerdo.hsv()):
         mapeamento_saida = mapeamento_loop_calc + 1
-        
+
         await Gyro_Move(0.8, 60, reverso=True)
         await gyro_turn(-90)
         await Gyro_Move_Infinito(60)
     elif is_verdefrente(hsv):
         #fazer logica depois do verde detectado para outros fins...
         mapeamento_verde_detected = True
-        
+
     elif is_vermelhofrente(hsv):
         await gyro_turn(-45)
         await Gyro_Move(0.8, 60)
@@ -625,7 +624,7 @@ async def cores_resgate_viradas():
     elif is_brancofrente(hsv):
         await gyro_turn(-90)
         await Gyro_Move_Infinito(60)
-        
+
 
 async def resgate_procura():
     global resgate_vitimas_finais, resgate_vitimas_esquerda, resgate_vitimas_direita
@@ -673,7 +672,7 @@ async def resgate_principal_loop():
         mapeamento_loop_calc += 1
         await cores_resgate_viradas()
     await resgate_procura()
-        
+
 
 
 
@@ -683,7 +682,7 @@ async def resgate_principal_loop():
 # -----------------------------------------
 async def main():
     await resgate_principal_loop()
-    
+
 
 
 
@@ -709,9 +708,9 @@ async def main():
     await resgate_esq()
     await resgate_dir()
     await resgate_esq()'''
-    
-        
-    
+
+
+
 
 run_task(main())
 

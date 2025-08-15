@@ -1,12 +1,27 @@
 # Funções de movimento e controle de motores
-import asyncio
+"""
+Módulo de movimentos do robô OBR.
+Inclui funções assíncronas para giros e deslocamentos com correção de heading.
+"""
+from typing import Any, Callable
 from pybricks.parameters import Color
 from pybricks.tools import wait, multitask
 
-# As variáveis globais e objetos de hardware devem ser importados do main.py ou passados como parâmetros
-# Exemplo: motoresquerdo, motordireito, drive_base, garra, MTZZ, sensor_frente, sensor_direito, sensor_esquerdo
-
-async def gyro_turn(graus, MTZZ, motoresquerdo, motordireito, PID, redefinir_pid, zerar_heading_residual, GYRO_TOL, GYRO_MIN, GYRO_MAX):
+async def gyro_turn(
+    graus: float,
+    MTZZ: Any,
+    motoresquerdo: Any,
+    motordireito: Any,
+    PID: Callable,
+    redefinir_pid: Callable,
+    zerar_heading_residual: Callable,
+    GYRO_TOL: float,
+    GYRO_MIN: float,
+    GYRO_MAX: float
+) -> None:
+    """
+    Realiza um giro preciso usando o IMU, com correção residual ao final.
+    """
     await redefinir_pid()
     kp = 4
     ki = 0.0008
@@ -41,7 +56,20 @@ async def gyro_turn(graus, MTZZ, motoresquerdo, motordireito, PID, redefinir_pid
         motoresquerdo.brake()
     zerar_heading_residual(alvo)
 
-async def Gyro_Move(rotacoes, velocidade_final, MTZZ, motoresquerdo, motordireito, PID, redefinir_pid, zerar_heading_residual, reverso=False):
+async def Gyro_Move(
+    rotacoes: float,
+    velocidade_final: float,
+    MTZZ: Any,
+    motoresquerdo: Any,
+    motordireito: Any,
+    PID: Callable,
+    redefinir_pid: Callable,
+    zerar_heading_residual: Callable,
+    reverso: bool = False
+) -> None:
+    """
+    Move o robô em linha reta por um número de rotações, corrigindo o heading.
+    """
     await redefinir_pid()
     motoresquerdo.reset_angle(0)
     await wait(0)
